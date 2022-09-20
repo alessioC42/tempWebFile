@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>transfear</title>
+        <style>
+            body {
+                background-image: linear-gradient(to right, blue, white, green);
+            }
+            .drop {
+                border: 3px dashed #fff;
+                align-items: center;
+                display: flex;
+                padding: 15px 18px;
+                cursor: pointer;
+                border-radius: 15px;
+                background-color: #8ebf42;
+                font-size: 16px;
+                font-weight: bold;
+                color: white;
+            }
+            button {
+                padding: 10px 25px;
+                font-size: 20px;
+                font-weight: 500;
+                border: none;
+                outline: none;
+                background: rgb(255, 139, 139);
+                color: #5256ad;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            .numberentry {
+                border: 2px #fff;
+                align-items: center;
+                display: flex;
+                padding: 15px 18px;
+                border-radius: 15px;
+                background-color: #8ebf42;
+                font-size: 16px;
+                font-weight: bold;
+                color: white;
+            }
+            .bugreport {
+                position: absolute;
+                bottom: 10px;
+                right: 19px;
+                font-size: 13px;
+            }
+        </style>
+    </head>
+    <body>
+        <center>
+            <h1>
+                File Transfear
+            </h1>
+            <h2>
+                download File
+            </h2>
+            <p>
+                Enter Upload-ID here
+                <input class="numberentry" type="number" placeholder="000000">
+                <br>
+                <button>Download</button>
+            </p>
+
+            <h2>
+                upload File
+            </h2>
+            <form action="fileupload" method="post" enctype="multipart/form-data">
+                <input class="drop" id="upload" type="file" name="filetoupload"> <p>
+                <input type="range" id="deleteduration" min="10" max="60">
+                <text id="deleteduration_label"></text>
+                <br>
+                <button>Upload</button>
+            </form>
+        </center>
+        <div class="bugreport">
+            found a bug? contact Alessio Caputo
+        </div>
+    </body>
+    <script>
+        var range = document.getElementById("deleteduration");
+        var range_label = document.getElementById("deleteduration_label");
+        range.value=15;
+        range_label.innerHTML = range.value + "min";
+        range.addEventListener("change", ()=>{
+            range_label.innerHTML = range.value + "min";
+        });
+
+    </script>
+</html>
