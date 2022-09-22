@@ -1,18 +1,24 @@
-var http = require('http');
-var formidable = require('formidable');
-var fs = require("fs");
-var jsonfile = require("jsonfile");
-
-var current_data = {}
+const http = require('http');
+const auth = require("http-auth");
+const formidable = require('formidable');
+const fs = require("fs");
+const jsonfile = require("jsonfile");
+const os = require("os");
+const { exec } = require("child_process");
 
 const DIR = __dirname;
 
-var PORT = 8080;
-if (process.argv.length >= 3) {
-  PORT = process.argv[2];
-}
+const MAINPORT = 80;
+const ADMINPORT = 8080;
 
-var server = http.createServer(function (req, res) {
+const basic = auth.basic({
+  realm: "ADMIN AREA",
+  file: __dirname + "/htpasswd",
+});
+
+var current_data = {};
+
+var mainServer = http.createServer(function (req, res) {
   if (req.url == '/fileupload') {
     var form = new formidable.IncomingForm();
     form.parse(req, function (err, fields, files) {
@@ -94,12 +100,21 @@ var server = http.createServer(function (req, res) {
         return res.end();
       });
     } else {
-      fs.readFile("./res/error.html", (_err, data)=>{
-        res.write(data);
-        return res.end();
+      fs.readFile("./res/error.html", (err, data)=>{
+        if (err) {
+          throw err;
+        }
+        return res.end(data);
       });
     }
 
+  } else if (req.url.startsWith("/admin")) {
+    fs.readFile("./res/redirecttoadmin.html", (err, data)=>{
+      if (err) {
+        throw err;
+      }
+      return res.end(data);
+    })
   } else {
     res.writeHead(200, {'Content-Type': 'text/html'});
     fs.readFile("./res/index.html", (err, data)=>{
@@ -110,11 +125,51 @@ var server = http.createServer(function (req, res) {
   }
 });
 
-server.listen(PORT);
 
-console.info("running on port "+PORT);
+var adminServer = http.createServer(
+  basic.check((req, res) => {
+    if (req.url == "/") {
+      fs.readFile("res/adminindex.html", (err, data)=>{
+        if (err) {
+          throw err;
+        }
+        return res.end(data);
+      });
 
-setInterval(()=>{processFiles()}, 60000)
+    } else if (req.url.toLowerCase().startsWith("/getsysteminformation")) {
+      getSystemStatusInformation((data)=>{
+        res.setHeader("Content-Type", "application/json");
+        return res.end(JSON.stringify(data));
+      })
+    } else if (req.url.toLowerCase().startsWith("/getcodesinformation")) {
+      res.setHeader("Content-Type", "application/json");
+      return res.end(JSON.stringify(current_data));
+    } else if (req.url.toLowerCase().startsWith("/rebootsystem")) {
+      exec("reboot");
+    }
+  })
+);
+
+
+function main() {
+  startMainServer();
+  runAdminServer();
+  setInterval(()=>{processFiles()}, 60000)
+}
+
+
+function startMainServer(){
+  mainServer.listen(MAINPORT, ()=>{
+    console.info("main running on port "+MAINPORT);
+  });
+}
+
+
+function runAdminServer() {
+  adminServer.listen(ADMINPORT, ()=>{
+    console.info("admin running on port "+ADMINPORT);
+  });
+}
 
 
 function getRandomCode() {
@@ -133,6 +188,7 @@ function random(min, max) {
     Math.random() * (max - min + 1) + min
   )
 }
+
 
 function processFiles(){
   var todelete = [];
@@ -153,3 +209,33 @@ function processFiles(){
   jsonfile.writeFile("./current_data.json", current_data);
 }
 
+
+function getSystemStatusInformation(callback) {
+  var info = {
+    "cpuload" : os.loadavg(),
+    "memory" : os.totalmem(),
+    "freememory" : os.freemem(),
+    "uptime" : os.uptime(),
+  }
+
+  exec("df -h -H /", (err, stdout, _stderr)=>{
+    if (err){
+      throw err;
+    }
+    var line2words = stdout.split("\n")[1].split(" ");
+    let newarr = line2words.filter(a => a !== '')
+    let e = {
+      "space" : newarr[1],
+      "used" : newarr[2],
+      "unused" : newarr[3],
+      "load" : newarr[4],
+      "directory" : newarr[5]
+    }
+
+    info["disk"] = e;
+    callback(info);
+  });
+}
+
+
+main();
