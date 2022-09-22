@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>transfear</title>
+        <style>
+            body {
+                background-image: linear-gradient(to right, blue, white, green);
+            }
+        </style>
+    </head>
+    <body>
+        <center>
+            <h1>
+                File Transfear
+            </h1>
+            <h2>
+                Error!
+            </h2>
+            <p>
+                The URL you entered is not valid!
+            <br>
+            <p>
+                Redirectring to <a href="/../..">main page</a> in 3 seconds
+            </p>
+        </center>
+    </body>
+    <script>
+        setTimeout(()=>{
+            window.location ="http://"+ window.location.host;
+        }, 3000)
+    </script>
+</html>

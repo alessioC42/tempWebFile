@@ -59,9 +59,9 @@
             </h2>
             <p>
                 Enter Upload-ID here
-                <input class="numberentry" type="number" placeholder="000000">
+                <input id="numberentry" class="numberentry" type="number" placeholder="######">
                 <br>
-                <button>Download</button>
+                <button id="downloadbutton">Download</button>
             </p>
 
             <h2>
@@ -69,14 +69,14 @@
             </h2>
             <form action="fileupload" method="post" enctype="multipart/form-data">
                 <input class="drop" id="upload" type="file" name="filetoupload"> <p>
-                <input type="range" id="deleteduration" min="10" max="60">
+                <input type="range" id="deleteduration" min="10" max="60" name="deleteduration">
                 <text id="deleteduration_label"></text>
                 <br>
                 <button>Upload</button>
             </form>
         </center>
         <div class="bugreport">
-            found a bug? contact Alessio Caputo
+            found a bug? contact <a href="mailto:alessiocaputo2007@gmail.com">Alessio Caputo</a>
         </div>
     </body>
     <script>
@@ -84,9 +84,27 @@
         var range_label = document.getElementById("deleteduration_label");
         range.value=15;
         range_label.innerHTML = range.value + "min";
-        range.addEventListener("change", ()=>{
+
+        range.addEventListener("input", ()=>{
             range_label.innerHTML = range.value + "min";
         });
+
+        var downloadbutton = document.getElementById("downloadbutton");
+        var numberentry = document.getElementById("numberentry");
+
+        numberentry.addEventListener("input", ()=> {
+            var entryvalue = String(numberentry.value)
+            if (entryvalue.length == 6) {
+                downloadbutton.disabled = false;
+            }   else    {
+                downloadbutton.disabled = true;
+            }
+        });
+
+        downloadbutton.addEventListener("click", ()=>{
+            url = "http://"+window.location.host+"/getfile/"+numberentry.value;
+            window.open(url, '_blank');
+        })
 
     </script>
 </html>
