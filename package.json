@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "formidable": "^2.0.1",
-    "jsonfile": "^6.1.0"
-  }
-}
