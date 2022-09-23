@@ -16,7 +16,10 @@ const basic = auth.basic({
   file: __dirname + "/htpasswd",
 });
 
+var settings = JSON.parse(fs.readFileSync("config.json"))
+
 var current_data = {};
+
 
 var mainServer = http.createServer(function (req, res) {
   if (req.url == '/fileupload') {
@@ -78,7 +81,7 @@ var mainServer = http.createServer(function (req, res) {
           res.write(data);
           return res.end();
         }
-      })
+      });
 
     } else  {
       fs.readFile("./res/error.html", (_err, data)=>{
@@ -118,10 +121,11 @@ var mainServer = http.createServer(function (req, res) {
   } else {
     res.writeHead(200, {'Content-Type': 'text/html'});
     fs.readFile("./res/index.html", (err, data)=>{
-      res.write(data);
-      return res.end();
+      if (err) {
+        throw err;
+      }
+      return res.end(String(data).replace('"???filesize???"', settings["max_file_size"]));
     });
-    
   }
 });
 
@@ -145,7 +149,14 @@ var adminServer = http.createServer(
       res.setHeader("Content-Type", "application/json");
       return res.end(JSON.stringify(current_data));
     } else if (req.url.toLowerCase().startsWith("/rebootsystem")) {
-      exec("reboot");
+      setTimeout(()=>{
+        exec("reboot");
+      }, 200);
+      return res.end("system reboot.");
+    } else if (req.url.toLowerCase().startsWith("/setmaxfilesize")) {
+      bytes = Number(req.url.split("/").pop());
+      settings["max_file_size"] = bytes;
+      return res.end(settings["max_file_size"]);
     }
   })
 );
@@ -202,7 +213,7 @@ function processFiles(){
   });
 
   for (let i = 0; i < todelete.length; i++) {
-    fs.rmdir("./storage/"+todelete[i], { recursive: true }, err => {if(err){throw (err);}});
+    fs.rm("./storage/"+todelete[i], { recursive: true }, err => {if(err){throw (err);}});
     delete current_data[todelete[i]];
   }
 

@@ -92,6 +92,7 @@
 
         var downloadbutton = document.getElementById("downloadbutton");
         var numberentry = document.getElementById("numberentry");
+        var fileupliad = document.getElementById("upload");
 
         numberentry.addEventListener("input", ()=> {
             var entryvalue = String(numberentry.value)
@@ -107,5 +108,11 @@
             window.open(url, '_blank');
         })
 
+        fileupliad.onchange =  ()=>{
+            if(fileupliad.files[0].size > "???filesize???"){
+                alert("File is too big!");
+                fileupliad.value = "";
+            };
+        }
     </script>
 </html>
