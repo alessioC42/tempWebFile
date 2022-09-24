@@ -5,8 +5,8 @@ const fs = require("fs");
 const jsonfile = require("jsonfile");
 const os = require("os");
 const { exec } = require("child_process");
+const { setFips } = require('crypto');
 
-const DIR = __dirname;
 
 const MAINPORT = 80;
 const ADMINPORT = 8080;
@@ -19,6 +19,14 @@ const basic = auth.basic({
 var settings = JSON.parse(fs.readFileSync("config.json"))
 
 var current_data = {};
+
+var STORAGEDIR;
+if (settings["storagedir"].endsWith("/")){
+  STORAGEDIR = settings["storagedir"];
+} else {
+  STORAGEDIR = settings["storagedir"] + "/";
+}
+
 
 
 var mainServer = http.createServer(function (req, res) {
@@ -33,8 +41,8 @@ var mainServer = http.createServer(function (req, res) {
       }
 
       var fileCode = getRandomCode(100000, 999999);
-      var filepath = (files.filetoupload.filepath);
-      var newfilepath = DIR + "/storage/" + String(fileCode) + "/" + files.filetoupload.originalFilename;
+      var oldfilepath = (files.filetoupload.filepath);
+      var newfilepath = STORAGEDIR + String(fileCode) + "/" + files.filetoupload.originalFilename;
 
       current_data[String(fileCode)] = {
         "filename": files.filetoupload.originalFilename,
@@ -45,19 +53,19 @@ var mainServer = http.createServer(function (req, res) {
 
       }
 
-      fs.mkdirSync(DIR + "/storage/"+fileCode, (err) => {
+      fs.mkdir(STORAGEDIR+fileCode, (err) => {
         if (err) {
           throw err;
         }
-      });
 
-      fs.rename(filepath, newfilepath, function (err) {
-        if (err) throw err;
+        moveFileAcrossDrives(oldfilepath, newfilepath, (_newpath)=> {
+
           fs.readFile("./res/fileuploaded.html", (_err, data)=>{
             data = String(data).replace("######", fileCode)
             res.write(data);
             return res.end();
           });
+        });
       });
     });
 
@@ -66,7 +74,7 @@ var mainServer = http.createServer(function (req, res) {
     
     if(current_data[code]) {
 
-      filepath = DIR + "/storage/" + code + "/" + current_data[code]["filename"];
+      filepath = STORAGEDIR + code + "/" + current_data[code]["filename"];
       fs.readFile(filepath, (err, data)=> {
         if (err) {
           fs.readFile("./res/error.html", (_err, data)=>{
@@ -124,7 +132,12 @@ var mainServer = http.createServer(function (req, res) {
       if (err) {
         throw err;
       }
-      return res.end(String(data).replace('"???filesize???"', settings["max_file_size"]));
+      d = String(data)
+        .replace('"???filesize???"', settings["max_file_size"])
+        .replace("filedurationmin", settings["filedurationmin"])
+        .replace("filedurationmax", settings["filedurationmax"]);
+
+      return res.end(d);
     });
   }
 });
@@ -156,7 +169,9 @@ var adminServer = http.createServer(
     } else if (req.url.toLowerCase().startsWith("/setmaxfilesize")) {
       bytes = Number(req.url.split("/").pop());
       settings["max_file_size"] = bytes;
-      return res.end(String(settings["max_file_size"]));
+      setFips.writeFile("config.json", JSON.stringify(settings), {}, ()=>{
+        return res.end(String(settings["max_file_size"]));
+      })
     }
   })
 );
@@ -213,7 +228,7 @@ function processFiles(){
   });
 
   for (let i = 0; i < todelete.length; i++) {
-    fs.rm("./storage/"+todelete[i], { recursive: true }, err => {if(err){throw (err);}});
+    fs.rm(STORAGEDIR+todelete[i], { recursive: true }, err => {if(err){throw (err);}});
     delete current_data[todelete[i]];
   }
 
@@ -245,6 +260,23 @@ function getSystemStatusInformation(callback) {
 
     info["disk"] = e;
     callback(info);
+  });
+}
+
+
+function moveFileAcrossDrives(oldpath, newpath, callback) {
+  fs.readFile(oldpath, (err, data) =>{
+    if(err) throw err; 
+
+    fs.writeFile(newpath, data, (err) => {
+      if (err) throw err;
+
+      fs.rm(oldpath, (err) => {
+        if (err) throw err;
+
+        callback(newpath)
+      });
+    });
   });
 }
 
