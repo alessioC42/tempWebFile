@@ -14,3 +14,9 @@ edit settings in config.json
 ```console
 nano config.json
 ```
+## run
+to use the port 80 you have to run the script as root
+
+```console
+sudo node index.js
+```
