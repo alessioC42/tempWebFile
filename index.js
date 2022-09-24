@@ -5,7 +5,6 @@ const fs = require("fs");
 const jsonfile = require("jsonfile");
 const os = require("os");
 const { exec } = require("child_process");
-const { setFips } = require('crypto');
 
 
 const MAINPORT = 80;
@@ -169,7 +168,7 @@ var adminServer = http.createServer(
     } else if (req.url.toLowerCase().startsWith("/setmaxfilesize")) {
       bytes = Number(req.url.split("/").pop());
       settings["max_file_size"] = bytes;
-      setFips.writeFile("config.json", JSON.stringify(settings), {}, ()=>{
+      fs.writeFile("config.json", JSON.stringify(settings), {}, ()=>{
         return res.end(String(settings["max_file_size"]));
       })
     }
