@@ -156,7 +156,7 @@ var adminServer = http.createServer(
     } else if (req.url.toLowerCase().startsWith("/setmaxfilesize")) {
       bytes = Number(req.url.split("/").pop());
       settings["max_file_size"] = bytes;
-      return res.end(settings["max_file_size"]);
+      return res.end(String(settings["max_file_size"]));
     }
   })
 );

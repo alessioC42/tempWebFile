@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>admin</title>
+        <link rel="icon" type="image/x-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAABdklEQVRYhe3UTUsCURQG4HccRx1ME7IShD6EJAiijWBUm8RNq6D6H9GmfkKt8g+0bdGiFkGrFkGbwkWQhFFSEA1ZopEz2kziTMsinY8rd5hF8y4v59zzMJczwH8P0+0wl1cOoGGtxxt31lP+Lavlnp6G6CQZZcF5sJnLK9uOACIBYH7US4SgCgCACM8QIagDSBG2AEgQtgH+InYv5Y1uNV6aA0s1FYKodZzzXgYtFWnbAbWmBqATAEDnj2PzE1iJC6ACOL96xoekOAeoVJvYOyrgqVx3BgAAn3IL+ydFXN9XiPpM11B4E3FReDGpkQAA7baK47MSyhUJ2dlxMDqrRwSoN75w+1A1v+lX8jdlvIsylheT8HOsYa3jW2D6BcJBHyYTA4Y1wqsEsfGzBampGL0niA+FsJIJGdYcnt6h+KiAZT1YWkhgemLQfLJVgNXwAQ6r2SRGYmGiPiqA4WgQmfQY+vt8xL1UAHMz8Z57Hd8CF+AC3HwDsutqcLf6EMYAAAAASUVORK5CYII=">
+        <style>
+            .button {
+                box-shadow: 0px 0px 4px 2px #70a0ff;
+                background-color:transparent;
+                border-radius:4px;
+                border:1px solid #5587fa;
+                display:inline-block;
+                cursor:pointer;
+                color:#000000;
+                font-family:Arial;
+                font-size:20px;
+                padding:11px 48px;
+                text-decoration:none;
+            }
+
+            progress {
+                height: 30px;
+                background-color: "grey";
+                width: 50%
+            }
+            #rebootButton {
+                box-shadow: 0px 0px 4px 2px #ff7070;
+                border:1px solid #fa5555;
+            }
+        </style>
+    </head>
+    <body>
+        <center>
+            <h1>tempWebFile admin page</h1>
+            <h2>System overview</h2>
+            <div id="storageinformation"></div>
+            <div id="disklabel"></div>
+            <progress id="diskprog" value="0" max="100"></progress>
+            <div id="memlabel"></div>
+            <progress id="memoryprog" value="0" max="100"></progress>
+            <div id="cpulabel"></div>
+            <div id="uptimelabel"></div>
+            <p>
+                set max-file-size (b):<br>
+                <input id="bytesinput" type="number" min="0">
+                <button id="bytesinputbutton" onclick="sendBytesLimit();">set</button>
+            </p>
+            <p>
+                <a id="viewcodes" target="_blank">
+                    <button class="button">list current files</button>
+                </a>
+            </p>
+            <button class="button" id="rebootButton" onclick="sendRebootCall();">reboot syscall</button>
+        </center>
+
+        <script defer>
+            updateAllInformation();
+            setInterval(updateAllInformation, 60000);
+
+            function updateAllInformation (){
+                getSystemStatusInformation((data) => {
+                    document.getElementById("storageinformation").innerHTML = "DISK: "+  data["disk"]["used"]+"/"+data["disk"]["space"]+" used ("+data["disk"]["unused"]+" free) - "+data["disk"]["load"];
+                    document.getElementById("diskprog").value = data["disk"]["load"].slice(0, -1);
+
+                    used_memory = String(((Number(data["memory"])) - Number(data["freememory"]))).split(".")[0];
+                    load_memory = String(100 / Number(data["memory"]) * Number(used_memory)).split(".")[0];
+                    document.getElementById("memlabel").innerHTML = "SYSTEM MEMORY: "+   used_memory+"/"+data["memory"]+" used ("+data["freememory"]+" free) - "+load_memory+"%";
+                    document.getElementById("memoryprog").value = String(load_memory);
+
+                    document.getElementById("cpulabel").innerHTML = "AGV CPU LOAD: "+ data["cpuload"];
+                    document.getElementById("uptimelabel").innerHTML = "UPTIME: "+timeStringFromSecs(Number(data["uptime"]));
+
+                    document.getElementById("viewcodes").href ="http://"+ window.location.host + "/getcodesinformation"
+                });
+            }
+
+            function getSystemStatusInformation(callback) {
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    json = JSON.parse(xhttp.responseText);
+                    callback(json);
+                    }
+                };
+                xhttp.open("GET", "http://"+window.location.host+"/getsysteminformation", true);
+                xhttp.send();
+            }
+
+            function timeStringFromSecs(seconds) {
+                var s = seconds;
+                var hours = 0;
+                var minuites = 0;
+                if (seconds >= 3600) {
+                    hours = Number(String(seconds/3600).split(".")[0])
+                    s -= hours * 3600
+                }
+                if (s >= 60) {
+                     minuites = Number(String(s/60).split(".")[0])
+                    s -= hours * 60
+                }
+                return (hours+"h "+minuites+"m");
+            }
+
+            function sendBytesLimit() {
+                var newbytesvalue = document.getElementById("bytesinput").value;
+
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    alert("set limit to "+xhttp.responseText+" bytes");
+                    }
+                };
+                xhttp.open("GET", "http://"+window.location.host+"/setmaxfilesize/"+newbytesvalue, true);
+                xhttp.send();
+            }
+
+            function sendRebootCall() {
+                var xhttp = new XMLHttpRequest();
+                xhttp.open("GET", "http://"+window.location.host+"/rebootsystem", true);
+                xhttp.send();
+                alert("send reboot call.")
+            }
+        </script>
+    </body>
+</html>
