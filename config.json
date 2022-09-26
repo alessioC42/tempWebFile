@@ -2,5 +2,5 @@
     "max_file_size" : 20971520,
     "filedurationmin": "5",
     "filedurationmax": "60",
-    "storagedir" : "/media/alessio/vol/"
+    "storagedir" : "storage"
 }

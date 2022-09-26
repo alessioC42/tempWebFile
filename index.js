@@ -165,6 +165,8 @@ var adminServer = http.createServer(
         exec("reboot");
       }, 200);
       return res.end("system reboot.");
+    } else if (req.url.toLowerCase().startsWith("/stopserverprocess")) {
+      process.exit(0);
     } else if (req.url.toLowerCase().startsWith("/setmaxfilesize")) {
       bytes = Number(req.url.split("/").pop());
       settings["max_file_size"] = bytes;
