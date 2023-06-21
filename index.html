@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Datei-Upload und -Download</title>
-  
+
   <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
   <style>
     body {
@@ -15,10 +16,6 @@
 
     .container {
       margin-top: 50px;
-    }
-
-    h1 {
-      text-align: center;
     }
 
     .upload-section {
@@ -31,53 +28,112 @@
       padding: 20px;
       margin-bottom: 20px;
     }
-
-    .form-control-lg {
-      font-size: 24px;
-    }
-
-    .btn-lg {
-      font-size: 24px;
-    }
   </style>
 </head>
+
 <body>
   <div class="container">
-    <h1>tempWebFile</h1>
+    <div class="text-center">
+      <h1>tempWebFile</h1>
+    </div>
+
 
     <div class="download-section">
-        <h2>Datei herunterladen</h2>
-  
-        <form>
-          <div class="form-group">
-            <label for="codeInput">Code eingeben:</label>
-            <input type="text" class="form-control form-control-lg" id="codeInput">
-          </div>
-  
-          <button type="submit" class="btn btn-primary btn-lg">Herunterladen</button>
-        </form>
+      <h2>Datei herunterladen</h2>
+
+      <div class="form-group">
+        <label for="codeInput">Code eingeben:</label>
+        <input type="text" class="form-control form-control-lg" id="codeInput">
       </div>
+
+      <button class="btn btn-primary btn-lg mt-2" onclick="downloadFile();">Herunterladen</button>
+    </div>
 
     <div class="upload-section">
       <h2>Datei hochladen</h2>
 
-      <form>
-        <div class="form-group">
-          <label for="fileInput">Datei auswählen:</label>
-          <input type="file" class="form-control-file form-control-lg" id="fileInput">
-        </div>
+      <div class="form-group">
+        <input type="file" class="form-control-file form-control-lg" id="fileInput">
+      </div>
 
-        <div class="">
-          <label for="slider">Time:</label>
-          <input type="range" class="form-range" id="slider">
-        </div>
+      <div class="form-group">
+        <label for="slider_minuites" id="slider_minuites_label">Time:</label>
+        <input type="range" class="form-range" id="slider_minuites" value="5" min="5" max="120">
+      </div>
 
-        <button type="submit" class="btn btn-primary btn-lg">Upload</button>
-      </form>
+      <button class="btn btn-primary btn-lg" onclick="uploadFile();">Upload</button>
+      <div class="text-center">
+        <h1 id="downloadCode" hidden>XXXXXX</h1>
+      </div>
+      <div class="text-center">
+        <div id="qrcode"></div>
+      </div>
+      <div class="progress mt-2" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar" style="width: 0%" id="progress_Bar"></div>
+      </div>
     </div>
   </div>
 
   <!-- Bootstrap JS -->
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="/qr/qrcode.js"></script>
+  <script>
+    function uploadFile() {
+      var fileInput = document.getElementById('fileInput');
+      var file = fileInput.files[0];
+
+      var formData = new FormData();
+      formData.append('file', file);
+      formData.append('minutes',
+        document.getElementById("slider_minuites").value
+      )
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/upload', true);
+
+      xhr.upload.onprogress = function (event) {
+        if (event.lengthComputable) {
+          var percentComplete = (event.loaded / event.total) * 100;
+          var progressBar = document.getElementById('progress_Bar');
+          progressBar.style.width = String(percentComplete) + "%";
+        }
+      };
+
+      xhr.onload = function () {
+        let codeBox = document.getElementById("downloadCode")
+        codeBox.innerText = xhr.responseText;
+        codeBox.hidden = false;
+
+        let qr = qrcode(0, "L");
+        qr.addData(window.location.origin+"/download/"+xhr.responseText);
+        qr.make();
+        document.getElementById('qrcode').innerHTML = qr.createSvgTag(10, 10);
+      };
+
+      xhr.send(formData);
+    }
+
+    function downloadFile() {
+      let code = String(document.getElementById("codeInput").value).toUpperCase();
+
+      download("/download/"+code);
+    }
+
+    function download(url) {
+      const a = document.createElement('a')
+      a.href = url
+      a.download = url.split('/').pop()
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+    }
+    let slider_minuites = document.getElementById("slider_minuites");
+
+    slider_minuites.addEventListener("input", () => {
+      document.getElementById("slider_minuites_label").innerText ="Time: "+ slider_minuites.value+"min";
+    });
+
+  </script>
 </body>
+
 </html>

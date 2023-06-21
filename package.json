@@ -1,9 +1,17 @@
 {
+  "name": "tempwebfile",
+  "version": "1.0.0",
+  "description": "This code allows you to setup a http file sharing website in your local network ## install instructions In order to use this script you have to use nodejs version 14 or newer.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Alessio C.",
+  "license": "ISC",
   "dependencies": {
     "bootstrap": "^5.3.0",
-    "crypto": "^1.0.1",
     "express": "^4.18.2",
     "multer": "^1.4.5-lts.1",
-    "path": "^0.12.7"
+    "qrcode-generator": "^1.4.4"
   }
 }

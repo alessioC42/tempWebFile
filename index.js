@@ -21,8 +21,12 @@ const storage = multer.diskStorage({
 // Konfiguriere Multer für den Datei-Upload
 const upload = multer({ storage });
 
-// Statische Dateien im Upload-Verzeichnis anzeigen
 app.use(express.static(uploadPath));
+app.use('/bootstrap/css', express.static(__dirname + '/node_modules/bootstrap/dist/css'));
+app.use('/bootstrap/js', express.static(__dirname + '/node_modules/bootstrap/dist/js'));
+app.use('/qr', express.static(__dirname + '/node_modules/qrcode-generator'));
+
+
 
 // Startseite anzeigen
 app.get('/', (req, res) => {
@@ -48,7 +52,7 @@ app.post('/upload', upload.single('file'), (req, res) => {
   const expirationDate = new Date(Date.now() + minutes * 60000);
 
   // Generiere den Download-Code
-  const downloadCode = crypto.randomBytes(4).toString('hex');
+  const downloadCode = String(crypto.randomBytes(3).toString('hex')).toUpperCase();
 
   // Speichere Metadaten zur Datei (Ablaufdatum, Download-Code und ursprünglicher Dateiname)
   const metadata = {
@@ -62,14 +66,14 @@ app.post('/upload', upload.single('file'), (req, res) => {
   const metadataPath = path.join(uploadPath, file.filename + '.json');
   fs.writeFileSync(metadataPath, JSON.stringify(metadata));
 
-  res.send(`Datei hochgeladen! Dein Download-Code lautet: ${downloadCode}`);
+  res.send(`${downloadCode}`);
 
   // Setze den Timer zum Löschen der Datei nach Ablauf der Zeitdauer
   const timeDiff = expirationDate - Date.now();
   setTimeout(() => {
     fs.unlinkSync(metadataPath);
     fs.unlinkSync(path.join(uploadPath, metadata.fileName));
-    console.log(`Datei ${metadata.fileName} wurde nach Ablauf der Zeitdauer gelöscht.`);
+    console.log(`Document ${metadata.fileName} deleted.`);
   }, timeDiff);
 });
 
