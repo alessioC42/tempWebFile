@@ -97,6 +97,6 @@ app.get('/download/:code', (req, res) => {
   res.status(404).send('File not found.');
 });
 
-app.listen(3000, () => {
+app.listen(config.port, () => {
   console.log(`server running on port ${config.port}`);
 });
