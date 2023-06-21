@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Datei-Upload und -Download</title>
+  
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+
+    .container {
+      margin-top: 50px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .upload-section {
+      background-color: #ff6b6b;
+      padding: 20px;
+    }
+
+    .download-section {
+      background-color: #74b9ff;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .form-control-lg {
+      font-size: 24px;
+    }
+
+    .btn-lg {
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>tempWebFile</h1>
+
+    <div class="download-section">
+        <h2>Datei herunterladen</h2>
+  
+        <form>
+          <div class="form-group">
+            <label for="codeInput">Code eingeben:</label>
+            <input type="text" class="form-control form-control-lg" id="codeInput">
+          </div>
+  
+          <button type="submit" class="btn btn-primary btn-lg">Herunterladen</button>
+        </form>
+      </div>
+
+    <div class="upload-section">
+      <h2>Datei hochladen</h2>
+
+      <form>
+        <div class="form-group">
+          <label for="fileInput">Datei auswählen:</label>
+          <input type="file" class="form-control-file form-control-lg" id="fileInput">
+        </div>
+
+        <div class="">
+          <label for="slider">Time:</label>
+          <input type="range" class="form-range" id="slider">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg">Upload</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

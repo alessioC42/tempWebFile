@@ -1,6 +1,7 @@
 {
-    "max_file_size" : 20971520,
-    "filedurationmin": "5",
-    "filedurationmax": "60",
-    "storagedir" : "storage"
+    "time": {
+        "min": 5,
+        "max": 180
+    },
+    "downloadcodelenght": 4
 }
