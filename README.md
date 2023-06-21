@@ -10,7 +10,7 @@ cd tempWebFile/
 ```
 install modules
 ```console
-npm install formidable http-auth jsonfile
+npm install
 ```
 edit settings in config.json
 ```console

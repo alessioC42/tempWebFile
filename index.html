@@ -6,16 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Datei-Upload und -Download</title>
 
-  <!-- Bootstrap CSS -->
   <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
   <style>
     body {
       background-color: #f8f9fa;
-    }
-
-    .container {
-      margin-top: 50px;
     }
 
     .upload-section {
@@ -74,7 +69,6 @@
     </div>
   </div>
 
-  <!-- Bootstrap JS -->
   <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="/qr/qrcode.js"></script>
   <script>
@@ -104,10 +98,12 @@
         codeBox.innerText = xhr.responseText;
         codeBox.hidden = false;
 
-        let qr = qrcode(0, "L");
-        qr.addData(window.location.origin+"/download/"+xhr.responseText);
-        qr.make();
-        document.getElementById('qrcode').innerHTML = qr.createSvgTag(10, 10);
+        if (xhr.status == 200) {
+          let qr = qrcode(0, "L");
+          qr.addData(window.location.origin + "/download/" + xhr.responseText);
+          qr.make();
+          document.getElementById('qrcode').innerHTML = qr.createSvgTag(10, 10);
+        }
       };
 
       xhr.send(formData);
@@ -115,8 +111,7 @@
 
     function downloadFile() {
       let code = String(document.getElementById("codeInput").value).toUpperCase();
-
-      download("/download/"+code);
+      download("/download/" + code);
     }
 
     function download(url) {
@@ -130,7 +125,7 @@
     let slider_minuites = document.getElementById("slider_minuites");
 
     slider_minuites.addEventListener("input", () => {
-      document.getElementById("slider_minuites_label").innerText ="Time: "+ slider_minuites.value+"min";
+      document.getElementById("slider_minuites_label").innerText = "Time: " + slider_minuites.value + "min";
     });
 
   </script>

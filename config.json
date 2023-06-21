@@ -3,5 +3,6 @@
         "min": 5,
         "max": 180
     },
-    "downloadcodelenght": 4
+    "downloadcodelenght": 4,
+    "port": 3000
 }
