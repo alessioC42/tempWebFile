@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Datei-Upload und -Download</title>
+  <title>tempWebFile</title>
 
   <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
@@ -34,18 +34,18 @@
 
 
     <div class="download-section">
-      <h2>Datei herunterladen</h2>
+      <h2>File download</h2>
 
       <div class="form-group">
-        <label for="codeInput">Code eingeben:</label>
+        <label for="codeInput">enter code:</label>
         <input type="text" class="form-control form-control-lg" id="codeInput">
       </div>
 
-      <button class="btn btn-primary btn-lg mt-2" onclick="downloadFile();">Herunterladen</button>
+      <button class="btn btn-primary btn-lg mt-2" onclick="downloadFile();">download</button>
     </div>
 
     <div class="upload-section">
-      <h2>Datei hochladen</h2>
+      <h2>File upload</h2>
 
       <div class="form-group">
         <input type="file" class="form-control-file form-control-lg" id="fileInput">
@@ -56,7 +56,7 @@
         <input type="range" class="form-range" id="slider_minuites" value="5" min="5" max="120">
       </div>
 
-      <button class="btn btn-primary btn-lg" onclick="uploadFile();">Upload</button>
+      <button class="btn btn-primary btn-lg" onclick="uploadFile();">upload</button>
       <div class="text-center">
         <h1 id="downloadCode" hidden>XXXXXX</h1>
       </div>
@@ -73,8 +73,11 @@
   <script src="/qr/qrcode.js"></script>
   <script>
     function uploadFile() {
+      var progressBar = document.getElementById('progress_Bar');
       var fileInput = document.getElementById('fileInput');
       var file = fileInput.files[0];
+
+      progressBar.style.width = "0%";
 
       var formData = new FormData();
       formData.append('file', file);
@@ -88,7 +91,6 @@
       xhr.upload.onprogress = function (event) {
         if (event.lengthComputable) {
           var percentComplete = (event.loaded / event.total) * 100;
-          var progressBar = document.getElementById('progress_Bar');
           progressBar.style.width = String(percentComplete) + "%";
         }
       };
@@ -123,6 +125,7 @@
       document.body.removeChild(a)
     }
     let slider_minuites = document.getElementById("slider_minuites");
+    document.getElementById("slider_minuites_label").innerText = "Time: " + slider_minuites.value + "min";
 
     slider_minuites.addEventListener("input", () => {
       document.getElementById("slider_minuites_label").innerText = "Time: " + slider_minuites.value + "min";

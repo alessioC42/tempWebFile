@@ -12,10 +12,10 @@ const uploadPath = path.join(__dirname, 'uploads');
 // Specify the location and filename for the uploaded files
 const storage = multer.diskStorage({
   destination: uploadPath,
-  filename: (req, file, cb) => {
-    const uniqueSuffix = crypto.randomBytes(6).toString('hex');
+  filename: (_req, file, cb) => {
+    const uniqueSuffix = crypto.randomBytes(10).toString('hex');
     cb(null, `${Date.now()}-${uniqueSuffix}-${file.originalname}`);
-  }
+  },
 });
 
 const upload = multer({ storage });
@@ -45,6 +45,10 @@ app.post('/upload', upload.single('file'), (req, res) => {
     return res.status(400).send('Ungültige Zeitdauer.');
   }
 
+  if (file.size > config.max_file_size_bytes) {
+    return res.status(400).send('Datei zu groß')
+  }
+
   // Calculate the expiration date of the file
   const expirationDate = new Date(Date.now() + minutes * 60000);
 
@@ -59,7 +63,7 @@ app.post('/upload', upload.single('file'), (req, res) => {
   };
   const metadataPath = path.join(uploadPath, file.filename + '.json');
   fs.writeFileSync(metadataPath, JSON.stringify(metadata));
-
+  console.log(downloadCode + " : "+ minutes +"min : "+ file.filename);
   res.send(`${downloadCode}`);
 
   // Set the timer to delete the file after the time period has elapsed
@@ -93,7 +97,6 @@ app.get('/download/:code', (req, res) => {
       }
     }
   }
-
   res.status(404).send('File not found.');
 });
 
